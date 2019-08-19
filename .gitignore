@@ -1,3 +1,4 @@
 .idea
 group-homeworks
 venv
+__pycache__
