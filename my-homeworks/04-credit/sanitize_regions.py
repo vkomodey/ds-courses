@@ -5,7 +5,7 @@ import requests as r
 
 def construct_url(living_region):
     living_region = living_region.replace(' ', '%20')
-    apiKey = '9c81adb9-0cfb-49a3-85b1-389698164430'
+    apiKey = 'your key here. that will not work'
 
     return 'https://geocode-maps.yandex.ru/1.x/?apikey={}&geocode={}&format=json'.format(apiKey, living_region)
 
@@ -20,8 +20,8 @@ living_regions_frame = pd.DataFrame({
 }, index=living_regions)
 
 # Яндекс отказался давать ответы на следующие 4 локации:
-# горьковской областью(нижегородская область)
-# эвенкинским ао(эвенкийский район)
+# горьковская область(Нижегородская Область)
+# эвенкинский ао(Эвенкийский Район)
 # 98(Санкт-Петербург)
 # 74(Челябинская область)
 for living_region in living_regions:
@@ -30,9 +30,6 @@ for living_region in living_regions:
 
     found_results = int(
         resp['response']['GeoObjectCollection']['metaDataProperty']['GeocoderResponseMetaData']['found'])
-
-    if found_results == 0:
-        continue
 
     sanitized_value = resp['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['name']
     point = resp['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split(' ')
@@ -43,4 +40,6 @@ for living_region in living_regions:
     living_regions_frame.set_value(living_region, 'longitude', longitude)
     living_regions_frame.set_value(living_region, 'latitude', latitude)
 
+
+living_regions_frame['dist'] = np.sqrt(living_regions_frame['longitude']**2 + living_regions_frame['latitude']**2)
 living_regions_frame.to_csv('./sanitized_regions.csv')
