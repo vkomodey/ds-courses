@@ -3,11 +3,14 @@ import numpy as np
 import requests as r
 
 
+# Данные о проживании достаточно грязные - с ошибками и нерепрезентативные
+# Хотелось бы по возможности представить каждую локацию одним числом + что бы для близких локаций числа тоже были близки
+
 def construct_url(living_region):
     living_region = living_region.replace(' ', '%20')
-    apiKey = 'your key here. that will not work'
+    api_key = 'your key here. that will not work'
 
-    return 'https://geocode-maps.yandex.ru/1.x/?apikey={}&geocode={}&format=json'.format(apiKey, living_region)
+    return 'https://geocode-maps.yandex.ru/1.x/?apikey={}&geocode={}&format=json'.format(api_key, living_region)
 
 
 living_regions = pd.read_csv('./unique_regions.csv', squeeze=True).values
@@ -41,5 +44,9 @@ for living_region in living_regions:
     living_regions_frame.set_value(living_region, 'latitude', latitude)
 
 
+# В колонке dist указывается новый признак - расстояние до фиксированной точки с широтой и долготой 0.0,
+# 0.0 Это позволит в будущем единобразно интерпретировать признак living_region числом. Плюс, интуитивно хочется
+# видеть близкие места с похожими коэффициентами(например, Москва и Московская область), из-за этого я отказался от
+# обычного label encoder
 living_regions_frame['dist'] = np.sqrt(living_regions_frame['longitude']**2 + living_regions_frame['latitude']**2)
 living_regions_frame.to_csv('./sanitized_regions.csv')
